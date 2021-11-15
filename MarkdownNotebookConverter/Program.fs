@@ -1,7 +1,7 @@
 ﻿module MarkdownNotebookConverter.Program
 
+open System.Text
 open Argu
-open System
 open System.IO
 
 [<CliPrefix(CliPrefix.DoubleDash)>]
@@ -14,20 +14,19 @@ type CliArgs =
             | Input _ -> "The input markdown file to read from"
             | Output _ -> "The output notebook file to write to"
 
-let args = Environment.GetCommandLineArgs() |> Array.skip 1
+[<EntryPoint>]
+let main args =
+    let arguments = ArgumentParser.Create<CliArgs>().Parse(args)
 
-let arguments = ArgumentParser.Create<CliArgs>().Parse(args)
+    let inputFile = arguments.GetResult(Input)
+    let outputFile = arguments.GetResult(Output) |> Option.defaultValue(Path.ChangeExtension(inputFile, ".dib"))
 
-let inputFile = arguments.GetResult(Input)
-let outputFile = arguments.GetResult(Output) |> Option.defaultValue(Path.ChangeExtension(inputFile, ".dib"))
+    let blocks = IO.parseNotebookSections File.OpenRead inputFile
 
-let inputStream = File.OpenRead inputFile
-let outputStream = File.Open(outputFile, FileMode.Truncate)
+    use outputStream = File.Open(outputFile, FileMode.Truncate)
+    use writer = new StreamWriter(outputStream, Encoding.Default)
 
-let blocks = Parsing.ParseMarkdown inputStream
+    IO.writeBlocks writer blocks
 
-FileIO.writeBlocks outputStream blocks
-
-inputStream.Dispose()
-outputStream.Dispose()
+    0
 

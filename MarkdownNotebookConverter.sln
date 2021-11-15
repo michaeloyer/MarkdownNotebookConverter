@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MarkdownNotebookConverter", "MarkdownNotebookConverter\MarkdownNotebookConverter.fsproj", "{A1518BBA-E1F4-4F03-8F3F-18E31146F295}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MarkdownNotebookConverter.Tests", "MarkdownNotebookConverter.Tests\MarkdownNotebookConverter.Tests.fsproj", "{5B42DB77-CF1A-4DD1-8665-282FD637C906}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{A1518BBA-E1F4-4F03-8F3F-18E31146F295}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1518BBA-E1F4-4F03-8F3F-18E31146F295}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1518BBA-E1F4-4F03-8F3F-18E31146F295}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B42DB77-CF1A-4DD1-8665-282FD637C906}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B42DB77-CF1A-4DD1-8665-282FD637C906}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B42DB77-CF1A-4DD1-8665-282FD637C906}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B42DB77-CF1A-4DD1-8665-282FD637C906}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

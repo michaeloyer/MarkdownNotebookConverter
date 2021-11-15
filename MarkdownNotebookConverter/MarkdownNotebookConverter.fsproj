@@ -7,8 +7,7 @@
 
   <ItemGroup>
     <Compile Include="Types.fs" />
-    <Compile Include="FileIO.fs" />
-    <Compile Include="Parsing.fs" />
+    <Compile Include="IO.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
