@@ -29,4 +29,3 @@ let main args =
     IO.writeBlocks writer blocks
 
     0
-
