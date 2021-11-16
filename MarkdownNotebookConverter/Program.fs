@@ -4,6 +4,7 @@ open System.Text
 open Argu
 open System.IO
 open FsToolkit.ErrorHandling
+open MarkdownNotebookConverter.Types
 
 [<CliPrefix(CliPrefix.DoubleDash)>]
 type CliArgs =
@@ -32,7 +33,13 @@ let main args =
 
         Directory.SetCurrentDirectory(Path.GetDirectoryName inputFile)
 
-        let blocks = IO.parseNotebookSections File.OpenRead inputFile
+        let openFile path =
+            if File.Exists path then
+                FileExists (File.OpenRead path)
+            else
+                FileNotFound
+
+        let blocks = IO.parseNotebookSections openFile inputFile
 
         use outputStream = File.Open(outputFile, FileMode.Truncate)
         use writer = new StreamWriter(outputStream, Encoding.Default)

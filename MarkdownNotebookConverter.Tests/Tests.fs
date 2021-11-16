@@ -4,16 +4,20 @@ open System
 open System.IO
 open System.Text
 open MarkdownNotebookConverter
+open MarkdownNotebookConverter.Types
 open FsUnit
 open Xunit
 
 let getOpenFile map (path:string) =
-    let text : string = map |> Map.find path
+    match map |> Map.tryFind path with
+    | Some (text:string) ->
+        let stream = new MemoryStream()
+        stream.Write(ReadOnlySpan(Encoding.Default.GetBytes(text)))
+        stream.Position <- 0L
 
-    let stream = new MemoryStream()
-    stream.Write(ReadOnlySpan(Encoding.Default.GetBytes(text)))
-    stream.Position <- 0L
-    stream
+        FileExists stream
+    | None ->
+        FileNotFound
 
 let testWriteBlocksToString writeToWriterFunction blocks =
     use writer = new StringWriter(NewLine="\n")
@@ -99,5 +103,18 @@ This is some Text
 #!markdown
 
 This is some Text in file 2
+
+"""
+
+[<Fact>]
+let ``Missing file paths are written in the notebook`` () =
+    let path = "missing/file/path"
+    let openFile = getOpenSingleFile "test" $"""<!--file({path})-->"""
+
+    IO.parseNotebookSections openFile "test"
+    |> testWriteBlocksToString IO.writeBlocks
+    |> should equal $"""#!markdown
+
+*File Missing: {path}*
 
 """

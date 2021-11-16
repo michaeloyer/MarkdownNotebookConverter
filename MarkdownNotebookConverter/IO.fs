@@ -54,18 +54,20 @@ let private parseMarkdown stream =
         | Failure (message, _, _) -> failwith message
 
 let parseNotebookSections openFile filePath =
-    let fileBlock = FileBlock filePath
-
     let rec parseNotebookSections parsedBlocks = [
         for parsedBlock in parsedBlocks do
             match parsedBlock with
             | NotebookSection notebookSection -> yield notebookSection
             | FileBlock path ->
-                use stream = openFile path
-                yield! parseNotebookSections (parseMarkdown stream)
+                match openFile path with
+                | FileExists stream ->
+                    use stream = stream
+                    yield! parseNotebookSections (parseMarkdown stream)
+                | FileNotFound ->
+                    yield (MarkdownSection $"*File Missing: {path}*")
     ]
 
-    parseNotebookSections [fileBlock]
+    parseNotebookSections [FileBlock filePath]
 
 let writeBlocks (writer:#TextWriter) blocks =
     let writeBlock (magicCommand:string) (text:string) =

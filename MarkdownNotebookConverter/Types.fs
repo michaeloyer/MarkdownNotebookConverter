@@ -16,3 +16,7 @@ type NotebookSection =
 type ParsedBlock =
     | NotebookSection of NotebookSection
     | FileBlock of path:string
+
+type FileOpenResult =
+    | FileExists of System.IO.Stream
+    | FileNotFound
