@@ -3,6 +3,7 @@
 open System.Text
 open Argu
 open System.IO
+open FsToolkit.ErrorHandling
 
 [<CliPrefix(CliPrefix.DoubleDash)>]
 type CliArgs =
@@ -16,18 +17,30 @@ type CliArgs =
 
 [<EntryPoint>]
 let main args =
-    let arguments = ArgumentParser.Create<CliArgs>().Parse(args)
+    result {
+        let! arguments =
+            try
+                Ok <| ArgumentParser.Create<CliArgs>().Parse(args)
+            with ex ->
+                Error ex.Message
 
-    let inputFile = arguments.GetResult(Input)
-    let outputFile = arguments.GetResult(Output) |> Option.defaultValue(Path.ChangeExtension(inputFile, ".dib"))
+        let! inputFile = arguments.GetResult(Input) |> function
+            | file when File.Exists(file) -> Ok file
+            | _ -> Error "Input file was not found"
+        let outputFile = arguments.GetResult(Output)
+                         |> Option.defaultValue(Path.ChangeExtension(inputFile, ".dib"))
 
-    Directory.SetCurrentDirectory(Path.GetDirectoryName inputFile)
+        Directory.SetCurrentDirectory(Path.GetDirectoryName inputFile)
 
-    let blocks = IO.parseNotebookSections File.OpenRead inputFile
+        let blocks = IO.parseNotebookSections File.OpenRead inputFile
 
-    use outputStream = File.Open(outputFile, FileMode.Truncate)
-    use writer = new StreamWriter(outputStream, Encoding.Default)
+        use outputStream = File.Open(outputFile, FileMode.Truncate)
+        use writer = new StreamWriter(outputStream, Encoding.Default)
 
-    IO.writeBlocks writer blocks
-
-    0
+        IO.writeBlocks writer blocks
+    }
+    |> function
+        | Ok () -> 0
+        | Error message ->
+            eprintfn $"%s{message}"
+            1
