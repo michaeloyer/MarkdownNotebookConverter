@@ -1,7 +1,7 @@
 module MarkdownNotebookConverter.IO
 
 open System.IO
-open Types
+open MarkdownNotebookConverter.Types
 open System.Text
 open FParsec
 
@@ -14,9 +14,9 @@ module internal Parsers =
         skipString "<!--" >>. skipManyTill anyChar (skipString "-->")
         |>> fun () -> Comment
 
-    let code language =
-        skipString ("```" + language) >>. (manyCharsTill anyChar (skipString "```"))
-        |>> fun text -> Code (language, (text.Trim()))
+    let code languageText supportedLanguage =
+        skipString ("```" + languageText) >>. (manyCharsTill anyChar (skipString "```"))
+        |>> fun text -> Code (supportedLanguage, (text.Trim()))
 
     let nonMarkdown =
         lookAhead (choice [
@@ -33,7 +33,7 @@ module internal Parsers =
 
     let parsedBlock =
         choice [
-            code "fsharp"
+            code "fsharp" FSharp
             file
             comment
             markdown
@@ -76,6 +76,5 @@ let writeBlocks (writer:#TextWriter) blocks =
 
     for block in blocks do
         match block with
-        | CodeSection("fsharp", text) -> writeBlock "#!fsharp" text
-        | CodeSection _ -> ()
+        | CodeSection(FSharp, text) -> writeBlock "#!F#" text
         | MarkdownSection text -> writeBlock "#!markdown" text

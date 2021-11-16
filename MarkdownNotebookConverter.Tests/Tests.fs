@@ -34,7 +34,7 @@ a
 
     IO.parseNotebookSections openFile "test"
     |> testWriteBlocksToString IO.writeBlocks
-    |> should equal """#!fsharp
+    |> should equal """#!F#
 
 let a = 1
 a
