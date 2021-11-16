@@ -18,10 +18,11 @@ type CliArgs =
 
 [<EntryPoint>]
 let main args =
+    let argumentParser = ArgumentParser.Create<CliArgs>()
     result {
         let! arguments =
             try
-                Ok <| ArgumentParser.Create<CliArgs>().Parse(args)
+                Ok <| argumentParser.Parse(args)
             with ex ->
                 Error ex.Message
 
@@ -49,5 +50,5 @@ let main args =
     |> function
         | Ok () -> 0
         | Error message ->
-            eprintfn $"%s{message}"
+            eprintfn $"{argumentParser.PrintUsage(message)}"
             1
