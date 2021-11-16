@@ -118,3 +118,34 @@ let ``Missing file paths are written in the notebook`` () =
 *File Missing: {path}*
 
 """
+
+[<Fact>]
+let ``Recursive File Paths encountered a second time write warning in notebook`` () =
+    let files = Map [
+        "test", """This is some Text
+
+<!--file(test2)-->
+"""
+        "test2", """This is some Text in file 2
+
+<!--file(test)-->
+"""
+    ]
+
+    let openFile = getOpenFile files
+
+    IO.parseNotebookSections openFile "test"
+    |> testWriteBlocksToString IO.writeBlocks
+    |> should equal """#!markdown
+
+This is some Text
+
+#!markdown
+
+This is some Text in file 2
+
+#!markdown
+
+*Recursive Path: test*
+
+"""
