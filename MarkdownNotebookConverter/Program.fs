@@ -21,6 +21,8 @@ let main args =
     let inputFile = arguments.GetResult(Input)
     let outputFile = arguments.GetResult(Output) |> Option.defaultValue(Path.ChangeExtension(inputFile, ".dib"))
 
+    Directory.SetCurrentDirectory(Path.GetDirectoryName inputFile)
+
     let blocks = IO.parseNotebookSections File.OpenRead inputFile
 
     use outputStream = File.Open(outputFile, FileMode.Truncate)
