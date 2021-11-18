@@ -72,7 +72,7 @@ let parseNotebookSections openFile filePath =
 
     parseNotebookSections Set.empty [FileBlock filePath]
 
-let writeBlocks (writer:#TextWriter) blocks =
+let writeBlocks (writer:TextWriter) blocks =
     let writeBlock (magicCommand:string) (text:string) =
         writer.WriteLine(magicCommand)
         writer.WriteLine()

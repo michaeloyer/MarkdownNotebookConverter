@@ -9,7 +9,7 @@ open MarkdownNotebookConverter.Types
 [<CliPrefix(CliPrefix.DoubleDash)>]
 type CliArgs =
     | [<Mandatory; MainCommand>] Input of string
-    | [<AltCommandLine("-o"); Unique>] Output of string option
+    | [<AltCommandLine("-o"); Unique>] Output of string
     interface IArgParserTemplate with
         member self.Usage =
             match self with
@@ -29,10 +29,10 @@ let main args =
         let! inputFile = arguments.GetResult(Input) |> function
             | file when File.Exists(file) -> Ok file
             | _ -> Error "Input file was not found"
-        let outputFile = arguments.GetResult(Output)
-                         |> Option.defaultValue(Path.ChangeExtension(inputFile, ".dib"))
+        let outputFile = arguments.GetResult(Output, defaultValue=Path.ChangeExtension(inputFile, ".dib"))
 
         Directory.SetCurrentDirectory(Path.GetDirectoryName inputFile)
+        let inputFile = Path.GetFileName inputFile
 
         let openFile path =
             if File.Exists path then
@@ -42,7 +42,7 @@ let main args =
 
         let blocks = IO.parseNotebookSections openFile inputFile
 
-        use outputStream = File.Open(outputFile, FileMode.Truncate)
+        use outputStream = File.Open(outputFile, FileMode.Create)
         use writer = new StreamWriter(outputStream, Encoding.Default)
 
         IO.writeBlocks writer blocks

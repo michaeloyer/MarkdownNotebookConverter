@@ -8,9 +8,13 @@ open MarkdownNotebookConverter.Types
 open FsUnit
 open Xunit
 
-let getOpenFile map (path:string) =
+type FilePath = string
+type FileContents = string
+type FileSystem = Map<FilePath, FileContents>
+
+let getOpenFile (map: FileSystem) (path:string): FileOpenResult =
     match map |> Map.tryFind path with
-    | Some (text:string) ->
+    | Some text ->
         let stream = new MemoryStream()
         stream.Write(ReadOnlySpan(Encoding.Default.GetBytes(text)))
         stream.Position <- 0L
@@ -24,7 +28,7 @@ let testWriteBlocksToString writeToWriterFunction blocks =
     writeToWriterFunction writer blocks
     writer.GetStringBuilder().ToString()
 
-let getOpenSingleFile fileName contents =
+let getOpenSingleFile fileName contents : FilePath -> FileOpenResult =
     getOpenFile (Map [ fileName, contents ])
 
 [<Fact>]
