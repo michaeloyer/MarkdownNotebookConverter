@@ -188,3 +188,36 @@ let b = 2
 b
 
 """
+
+[<Fact>]
+let ``Loading Markdown File followed by F# script file loads correctly`` () =
+    let files = Map [
+        "test.md", """Here is some F# code
+
+<!--file(test2.md)-->
+<!--file(test.fsx)-->"""
+        "test2.md", """Here is some markdown first"""
+        "test.fsx", """let a = 1
+
+a * a"""
+    ]
+
+    let openFile = getOpenFile files
+
+    IO.parseNotebookSections openFile "test.md"
+    |> testWriteBlocksToString IO.writeBlocks
+    |> should equal """#!markdown
+
+Here is some F# code
+
+#!markdown
+
+Here is some markdown first
+
+#!F#
+
+let a = 1
+
+a * a
+
+"""

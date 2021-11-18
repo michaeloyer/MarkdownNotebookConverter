@@ -6,12 +6,13 @@ open System.Text
 open FParsec
 
 module internal Parsers =
+    let singleLineChars = (noneOf ['\n'; '\r'])
     let file =
-        skipString "<!--file(" >>. manyCharsTill anyChar (skipString ")-->")
+        skipString "<!--file(" >>. manyCharsTill singleLineChars (skipString ")-->")
         |>> File
 
     let codeFile extension supportedLanguage =
-        skipString "<!--file(" >>. manyCharsTill anyChar (skipString $".{extension})-->")
+        skipString "<!--file(" >>. manyCharsTill singleLineChars (skipString $".{extension})-->")
         |>> fun path -> CodeFile (supportedLanguage, path + $".{extension}")
 
     let comment =
