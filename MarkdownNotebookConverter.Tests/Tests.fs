@@ -8,8 +8,6 @@ open MarkdownNotebookConverter.Types
 open FsUnit
 open Xunit
 
-type FilePath = string
-type FileContents = string
 type FileSystem = Map<FilePath, FileContents>
 
 let getOpenFile (map: FileSystem) (path:string): FileOpenResult =
@@ -151,5 +149,42 @@ This is some Text in file 2
 #!markdown
 
 *Recursive Path: test*
+
+"""
+
+[<Fact>]
+let ``F# script files are loaded directly as F# blocks`` () =
+    let files = Map [
+        "test.md", """Here is some F# code
+
+<!--file(test.fsx)-->
+<!--file(test.fs)-->"""
+        "test.fsx", """let a = 1
+
+a"""
+        "test.fs", """let b = 2
+
+b"""
+    ]
+
+    let openFile = getOpenFile files
+
+    IO.parseNotebookSections openFile "test.md"
+    |> testWriteBlocksToString IO.writeBlocks
+    |> should equal """#!markdown
+
+Here is some F# code
+
+#!F#
+
+let a = 1
+
+a
+
+#!F#
+
+let b = 2
+
+b
 
 """

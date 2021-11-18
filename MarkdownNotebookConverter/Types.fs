@@ -2,20 +2,25 @@
 
 type SupportedLanguage = FSharp
 
+type FilePath = string
+type FileContents = string
+
 type MarkdownBlock =
-    | Markdown of text:string
-    | Code of language:SupportedLanguage * text:string
-    | File of path:string
+    | Markdown of text:FileContents
+    | Code of language:SupportedLanguage * text:FileContents
+    | File of path:FilePath
+    | CodeFile of language:SupportedLanguage * path:FilePath
     | Comment
     | Empty
 
 type NotebookSection =
-    | MarkdownSection of text:string
-    | CodeSection of language:SupportedLanguage * text:string
+    | MarkdownSection of text:FileContents
+    | CodeSection of language:SupportedLanguage * text:FileContents
 
 type ParsedBlock =
     | NotebookSection of NotebookSection
-    | FileBlock of path:string
+    | FileBlock of path:FilePath
+    | CodeFileBlock of SupportedLanguage * path:FilePath
 
 type FileOpenResult =
     | FileExists of System.IO.Stream

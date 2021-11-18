@@ -10,6 +10,10 @@ module internal Parsers =
         skipString "<!--file(" >>. manyCharsTill anyChar (skipString ")-->")
         |>> File
 
+    let codeFile extension supportedLanguage =
+        skipString "<!--file(" >>. manyCharsTill anyChar (skipString $".{extension})-->")
+        |>> fun path -> CodeFile (supportedLanguage, path + $".{extension}")
+
     let comment =
         skipString "<!--" >>. skipManyTill anyChar (skipString "-->")
         |>> fun () -> Comment
@@ -34,6 +38,8 @@ module internal Parsers =
     let parsedBlock =
         choice [
             code "fsharp" FSharp
+            attempt(codeFile "fsx" FSharp)
+            attempt(codeFile "fs" FSharp)
             file
             comment
             markdown
@@ -41,6 +47,7 @@ module internal Parsers =
         |>> function
             | Markdown text -> Some(NotebookSection(MarkdownSection(text)))
             | Code(language, text) -> Some(NotebookSection(CodeSection(language, text)))
+            | CodeFile(language, path) -> Some(CodeFileBlock(language, path))
             | File path -> Some(FileBlock(path))
             | Empty -> None
             | Comment -> None
@@ -68,6 +75,15 @@ let parseNotebookSections openFile filePath =
                         yield! parseNotebookSections (usedPathSet |> Set.add path) (parseMarkdown stream)
                     | FileNotFound ->
                         yield (MarkdownSection $"*File Missing: {path}*")
+            | CodeFileBlock(language, path) ->
+                match openFile path with
+                | FileExists stream ->
+                    use stream = stream
+                    use reader = new StreamReader(stream)
+                    let content = reader.ReadToEnd()
+                    yield (CodeSection (language, content))
+                | FileNotFound ->
+                    yield (MarkdownSection $"*Source File Missing: {path}*")
     ]
 
     parseNotebookSections Set.empty [FileBlock filePath]
