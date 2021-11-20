@@ -13,11 +13,7 @@ type FileSystem = Map<FilePath, FileContents>
 let getOpenFile (map: FileSystem) (path:string): FileOpenResult =
     match map |> Map.tryFind path with
     | Some text ->
-        let stream = new MemoryStream()
-        stream.Write(ReadOnlySpan(Encoding.Default.GetBytes(text)))
-        stream.Position <- 0L
-
-        FileExists stream
+        FileExists (new MemoryStream(Encoding.Default.GetBytes(text)))
     | None ->
         FileNotFound
 
